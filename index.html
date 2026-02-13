@@ -1139,11 +1139,26 @@
         let dataObj = (adminLevel === 'brasil') ? visitasEstados : (adminLevel === 'ceara' ? visitasMunicipios : visitasBairros);
         Object.keys(dataObj).sort().forEach(key => {
             const row = document.createElement('div'); row.className = 'state-edit-row';
-            row.innerHTML = `<input type="text" class="form-control form-control-sm fw-bold me-2" style="width:150px" value="${key}" onchange="renameDataKey('${key}', this.value)"><input type="number" class="form-control form-control-sm" value="${dataObj[key]}" onchange="updateDataValue('${key}', this.value)">`;
+            row.innerHTML = `<input type="text" class="form-control form-control-sm fw-bold me-2" style="width:150px" value="${key}" onchange="renameDataKey('${key}', this.value)"><input type="number" class="form-control form-control-sm me-2" value="${dataObj[key]}" onchange="updateDataValue('${key}', this.value)"><button class="btn btn-outline-danger btn-sm p-1" style="font-size:10px" onclick="deleteDataKey('${key}')"><i class="fas fa-trash"></i></button>`;
             list.appendChild(row);
         });
         updateAdminCoords();
         updateIDHList();
+    }
+
+    function deleteDataKey(key) {
+        if (!confirm(`Deseja realmente excluir "${key}"? Esta ação removerá os dados de visitas e a marcação no mapa.`)) return;
+        
+        if (adminLevel === 'brasil') delete visitasEstados[key];
+        else if (adminLevel === 'ceara') delete visitasMunicipios[key];
+        else if (adminLevel === 'fortaleza') {
+            delete visitasBairros[key];
+            if (selectedItems.has(key)) selectedItems.delete(key);
+        }
+        
+        updateAdminList();
+        updateMap();
+        saveToDB();
     }
 
     function updateIDHList() {
@@ -1287,7 +1302,6 @@
     });
 
     $(document).ready(() => { initMap(); });
-
 
 </script>
 </body>
